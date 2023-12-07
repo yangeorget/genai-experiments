@@ -28,7 +28,7 @@ SHOPPINGS = [
         "6 bouteilles de lait",
         "4 yaourts à la vanille",
         "4 yaourts de chèvre",
-        "1 roblochon",
+        "1 reblochon",
         "1 kilogramme de tomates",
         "1 concombre",
         "1 chou-fleur",
@@ -85,6 +85,7 @@ def get_chat():
 #    print(f"Bot : {response.text}")
 
 def main(page: ft.Page):
+    # see https://flet.dev/docs/tutorials/python-realtime-chat
     chat = get_chat()
     user_question = ft.TextField(hint_text="", width=300)
 
@@ -103,5 +104,5 @@ def main(page: ft.Page):
 
 ft.app(
     target=main,
-    view=ft.AppView.WEB_BROWSER
+    #view=ft.AppView.WEB_BROWSER
 )
