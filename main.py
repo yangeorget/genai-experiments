@@ -21,8 +21,8 @@ SHOPPINGS = [
         "1 laitue",
         "5 bananes",
         "1 kilogramme de pommes",
-        "1 pack de 6 bouteilles d'Evian",
-        "une bouteille de bordeaux"
+        "1 pack de 6 bouteilles d'eau d'Evian",
+        "une bouteille de vin de bordeaux"
      ],
 [
         "6 bouteilles de lait",
@@ -74,29 +74,24 @@ def get_examples():
         )
     ]
 
-def get_chat():
+def get_model():
     vertexai.init(project="yan-playground-395409", location="us-central1")
     return ChatModel.from_pretrained("chat-bison").start_chat(context=get_context(),examples=get_examples())
 
-# chat = get_chat()
-# while True:
-#    message = input("User : ")
-#    response = chat.send_message(message, **MODEL_PARAMETERS)
-#    print(f"Bot : {response.text}")
-
 def main(page: ft.Page):
     # see https://flet.dev/docs/tutorials/python-realtime-chat
-    chat = get_chat()
-    user_question = ft.TextField(hint_text="", width=300)
-
+    model = get_model()
+    chat = ft.ListView()
     def ask(e):
-        user_message = user_question.value
-        page.add(ft.Text(user_message))
-        bot_response = chat.send_message(user_message, **MODEL_PARAMETERS)
-        page.add(ft.Text(bot_response.text))
+        user_message = new_message.value
+        new_message.value = ""
+        chat.controls.append(ft.Text(user_message, text_align=ft.TextAlign.RIGHT, bgcolor=ft.colors.BLUE))
+        bot_response = model.send_message(user_message, **MODEL_PARAMETERS)
+        chat.controls.append(ft.Text(bot_response.text, text_align=ft.TextAlign.LEFT, bgcolor=ft.colors.CYAN))
         page.update()
 
-    page.add(ft.Row([user_question, ft.ElevatedButton("Ask", on_click=ask)]))
+    new_message = ft.TextField(on_submit=ask)
+    page.add(chat, new_message)
     page.update()
 
 
@@ -104,5 +99,5 @@ def main(page: ft.Page):
 
 ft.app(
     target=main,
-    #view=ft.AppView.WEB_BROWSER
+    view=ft.AppView.WEB_BROWSER
 )
