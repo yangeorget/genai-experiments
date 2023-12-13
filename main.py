@@ -5,7 +5,6 @@ import flet as ft
 
 MODEL_PARAMETERS = {
         "candidate_count": 1,
-        "max_output_tokens": 1024,
         "temperature": 0.2,
         "top_p": 0.8,
         "top_k": 40
@@ -21,6 +20,8 @@ SHOPPINGS = [
         "1 laitue",
         "5 bananes",
         "1 kilogramme de pommes",
+        "4 cuisses de poulet"
+        "1 kg de riz",
         "1 pack de 6 bouteilles d'eau d'Evian",
         "une bouteille de vin de bordeaux"
      ],
@@ -34,7 +35,9 @@ SHOPPINGS = [
         "1 chou-fleur",
         "5 bananes",
         "1 kilogramme de prunes",
-        "1 pack de 6 bouteilles d'Evian",
+        "un rôti de porc",
+        "un paquet de macaronis",
+        "1 pack de 6 bouteilles d'eau d'Evian",
         "une bouteille de côtes-du-rhône"
      ],
 [
@@ -45,7 +48,8 @@ SHOPPINGS = [
         "1 botte de radis",
         "6 kiwis",
         "1 kilogramme de pommes",
-        "1 pack de 6 bouteilles d'Hépar",
+        "des tranches de jambon",
+        "1 pack de 6 bouteilles d'eau d'Hépar",
         "3 baguettes"
      ],
 ]
@@ -56,45 +60,30 @@ def get_context():
     context += "Tu es capable de me dire quelles catégories de produits j'ai oublié par rapport aux semaines précédentes. Sois concis, sans rentrer dans les détails. "
     context += "Par exemple, tu oublies d'acheter du pain et du lait. "
     context += "Tu m'avertis aussi si j'achète des produits en double cette semaine. "
-    context += "Par exemple : tu achètes beaucoup de laitages, tu ne trouves pas ? "
     for shopping in SHOPPINGS:
         items = ", ".join(shopping).strip()
         context += f"Une semaine précedente, j'avais acheté : {items}. "
     return context
 
-def get_examples():
-    return [
-        InputOutputTextPair(
-            input_text="Est-ce que j'ai oublié quelque chose cette semaine ?",
-            output_text="Non, tu n'as rien oublié cette semaine."
-        ),
-        InputOutputTextPair(
-            input_text="Est-ce que j'ai oublié quelque chose cette semaine ?",
-            output_text="Oui, tu as oublié certains produits."
-        )
-    ]
-
 def get_model():
     vertexai.init(project="yan-playground-395409", location="us-central1")
-    return ChatModel.from_pretrained("chat-bison").start_chat(context=get_context(),examples=get_examples())
+    return ChatModel.from_pretrained("chat-bison").start_chat(context=get_context())
 
 def main(page: ft.Page):
     # see https://flet.dev/docs/tutorials/python-realtime-chat
     model = get_model()
-    chat = ft.ListView()
+    chat = ft.Column()
     def ask(e):
         user_message = new_message.value
         new_message.value = ""
-        chat.controls.append(ft.Text(user_message, text_align=ft.TextAlign.RIGHT, bgcolor=ft.colors.BLUE))
+        chat.controls.append(ft.Container(content=ft.Text(user_message), alignment=ft.alignment.center_right, bgcolor=ft.colors.BLUE_200, padding=10, margin=10, border_radius=5))
         bot_response = model.send_message(user_message, **MODEL_PARAMETERS)
-        chat.controls.append(ft.Text(bot_response.text, text_align=ft.TextAlign.LEFT, bgcolor=ft.colors.CYAN))
+        chat.controls.append(ft.Container(content=ft.Text(bot_response.text), alignment=ft.alignment.center_left, bgcolor=ft.colors.BLUE_400, padding=10, margin=10, border_radius=5))
         page.update()
 
     new_message = ft.TextField(on_submit=ask)
-    page.add(chat, new_message)
+    page.add(chat, ft.Row(controls=[new_message]))
     page.update()
-
-
 
 
 ft.app(
